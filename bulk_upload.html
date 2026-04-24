@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bulk Upload Products — Chems Root</title>
+  <style>
+    :root {
+      --brand-teal: #00A99D;
+      --brand-teal-dark: #008f85;
+      --bg-color: #f9fbfb;
+      --surface: #ffffff;
+      --text-primary: #1f2937;
+      --text-muted: #6b7280;
+      --border-light: #e5e7eb;
+      --success: #10B981;
+    }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 40px 20px;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: var(--surface);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    h1 {
+      margin-top: 0;
+      color: var(--brand-teal);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    p { color: var(--text-muted); }
+    .btn {
+      display: inline-block;
+      background: var(--brand-teal);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: var(--brand-teal-dark); }
+    .btn.secondary {
+      background: white;
+      color: var(--text-primary);
+      border: 1px solid var(--border-light);
+    }
+    .btn.secondary:hover { background: #f3f4f6; }
+    
+    .upload-area {
+      border: 2px dashed var(--brand-teal);
+      border-radius: 8px;
+      padding: 40px 20px;
+      text-align: center;
+      margin: 30px 0;
+      background: rgba(0, 169, 157, 0.05);
+    }
+    .upload-area input[type="file"] {
+      display: none;
+    }
+    .upload-label {
+      display: inline-block;
+      background: var(--brand-teal);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      margin-top: 10px;
+    }
+    .upload-label:hover { background: var(--brand-teal-dark); }
+    
+    .actions {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    #result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 6px;
+      display: none;
+    }
+    #result.success {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      display: block;
+    }
+    #result.error {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      display: block;
+    }
+    
+    .csv-format {
+      margin-top: 30px;
+      background: #f3f4f6;
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+    .csv-format code {
+      background: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border-light);
+      color: #e11d48;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>📦 Bulk Upload Products</h1>
+  <p>Upload a CSV file to add multiple products to your catalog at once. Categories and labels will be created automatically if they don't exist. Images will be assigned automatically based on the category (you can edit them manually later).</p>
+  
+  <div class="actions">
+    <button class="btn secondary" id="download-sample">⬇️ Download Sample CSV</button>
+    <a href="index.html" class="btn secondary">⬅️ Back to Catalog</a>
+  </div>
+
+  <div class="upload-area">
+    <div style="font-size: 3rem; margin-bottom: 10px;">📄</div>
+    <h3>Select a CSV file to upload</h3>
+    <p>Ensure your file matches the sample format.</p>
+    <label for="csv-file" class="upload-label">Browse File</label>
+    <input type="file" id="csv-file" accept=".csv" />
+    <div id="file-name" style="margin-top: 15px; font-weight: 500;"></div>
+  </div>
+
+  <button class="btn" id="upload-btn" style="width: 100%; padding: 15px; font-size: 1.1rem; display: none;">Upload & Process Products</button>
+
+  <div id="result"></div>
+
+  <div class="csv-format">
+    <strong>Expected CSV Columns (in order):</strong><br>
+    <code>ID</code>, <code>Name</code>, <code>Composition</code>, <code>Description</code>, <code>Price</code>, <code>Category</code>, <code>Labels</code>, <code>Packaging</code>, <code>Badge</code><br><br>
+    <em>Note: For multiple labels, separate them with a semicolon (e.g., <code>General;Cardiac</code>).</em>
+  </div>
+</div>
+
+<script>
+  // Default image map by category (copied from app.js)
+  const CATEGORY_IMAGES = {
+    "Tablets": "assets/pharma_tablets.png",
+    "Capsules": "assets/pharma_capsules.png",
+    "Syrups": "assets/pharma_syrup.png",
+    "Injections": "assets/pharma_injection.png",
+    "Topical": "assets/pharma_cream.png",
+    "Drops & Solutions": "assets/pharma_drops.png",
+  };
+
+  const fileInput = document.getElementById('csv-file');
+  const fileNameDisplay = document.getElementById('file-name');
+  const uploadBtn = document.getElementById('upload-btn');
+  const resultDiv = document.getElementById('result');
+  
+  fileInput.addEventListener('change', function(e) {
+    if (e.target.files.length > 0) {
+      fileNameDisplay.textContent = 'Selected: ' + e.target.files[0].name;
+      uploadBtn.style.display = 'block';
+      resultDiv.style.display = 'none';
+      resultDiv.className = '';
+    }
+  });
+
+  document.getElementById('download-sample').addEventListener('click', function() {
+    const header = "ID,Name,Composition,Description,Price,Category,Labels,Packaging,Badge\n";
+    const sampleRow1 = "CR-TAB-101,New Paracetamol 500mg,Paracetamol IP 500mg,Effective relief from fever.,35.00,Tablets,General,Strip of 10 tablets,New\n";
+    const sampleRow2 = "CR-SYR-102,Cough Syrup,Dextromethorphan,Relief from cough.,75.00,Syrups,General;Pediatric,100ml bottle,\n";
+    
+    const blob = new Blob([header + sampleRow1 + sampleRow2], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'sample_products.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  });
+
+  uploadBtn.addEventListener('click', function() {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const text = e.target.result;
+      processCSV(text);
+    };
+    reader.onerror = function() {
+      showResult('Error reading the file.', false);
+    };
+    reader.readAsText(file);
+  });
+
+  function processCSV(csvText) {
+    try {
+      const lines = csvText.split('\\n');
+      if (lines.length < 2) {
+        showResult('CSV file appears to be empty or has only headers.', false);
+        return;
+      }
+
+      // Simple CSV parser that handles quotes
+      function parseCSVLine(line) {
+        const result = [];
+        let current = '';
+        let inQuotes = false;
+        
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+          if (char === '"' && line[i+1] === '"') {
+            current += '"';
+            i++;
+          } else if (char === '"') {
+            inQuotes = !inQuotes;
+          } else if (char === ',' && !inQuotes) {
+            result.push(current);
+            current = '';
+          } else {
+            current += char;
+          }
+        }
+        result.push(current);
+        return result.map(s => s.trim());
+      }
+
+      const newProducts = [];
+      const newCategories = new Set();
+      const newLabels = new Set();
+
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        
+        const cols = parseCSVLine(line);
+        if (cols.length < 8) continue; // Skip malformed rows
+
+        const id = cols[0];
+        const name = cols[1];
+        const composition = cols[2];
+        const description = cols[3];
+        const price = parseFloat(cols[4]);
+        const category = cols[5];
+        const labelsRaw = cols[6];
+        const packaging = cols[7];
+        const badge = cols[8] || "";
+
+        if (!id || !name) continue;
+
+        // Process labels
+        const labelsArray = labelsRaw ? labelsRaw.split(';').map(l => l.trim()).filter(l => l) : ["General"];
+        
+        // Default Image based on Category
+        let image = "assets/pharma_tablets.png"; // Fallback
+        if (CATEGORY_IMAGES[category]) {
+          image = CATEGORY_IMAGES[category];
+        }
+
+        newProducts.push({
+          id,
+          name,
+          composition,
+          description,
+          price: isNaN(price) ? 0 : price,
+          category,
+          labels: labelsArray,
+          image,
+          packaging,
+          badge
+        });
+
+        if (category) newCategories.add(category);
+        labelsArray.forEach(l => newLabels.add(l));
+      }
+
+      if (newProducts.length === 0) {
+        showResult('No valid products found in the CSV.', false);
+        return;
+      }
+
+      // Save to localStorage
+      // Load existing data
+      let existingProducts = [];
+      try {
+        const pData = localStorage.getItem('cr_products');
+        if (pData) existingProducts = JSON.parse(pData);
+      } catch(e) {}
+
+      let existingCategories = [];
+      try {
+        const cData = localStorage.getItem('cr_categories');
+        if (cData) existingCategories = JSON.parse(cData);
+      } catch(e) {}
+
+      let existingLabelsMap = [];
+      try {
+        const lData = localStorage.getItem('cr_labels');
+        if (lData) existingLabelsMap = JSON.parse(lData);
+      } catch(e) {}
+
+      // Merge products (update if ID exists, push if new)
+      let added = 0;
+      let updated = 0;
+
+      newProducts.forEach(newP => {
+        const idx = existingProducts.findIndex(p => p.id === newP.id);
+        if (idx >= 0) {
+          // Keep existing image if they didn't manually change it in the app? 
+          // Actually, we'll overwrite except for image if the existing one is custom.
+          const oldImage = existingProducts[idx].image;
+          if (oldImage && !oldImage.startsWith("assets/")) {
+            newP.image = oldImage; // preserve manual uploads
+          }
+          existingProducts[idx] = newP;
+          updated++;
+        } else {
+          existingProducts.push(newP);
+          added++;
+        }
+      });
+
+      // Merge Categories
+      newCategories.forEach(c => {
+        if (!existingCategories.includes(c)) existingCategories.push(c);
+      });
+
+      // Merge Labels
+      newLabels.forEach(l => {
+        if (!existingLabelsMap.includes(l)) existingLabelsMap.push(l);
+      });
+
+      // Save back
+      localStorage.setItem('cr_products', JSON.stringify(existingProducts));
+      localStorage.setItem('cr_categories', JSON.stringify(existingCategories));
+      localStorage.setItem('cr_labels', JSON.stringify(existingLabelsMap));
+
+      showResult(`✅ Successfully processed! Added: ${added}, Updated: ${updated}. <br><br>You can now go back to the catalog to see your new products.`, true);
+      
+      // Reset input
+      fileInput.value = '';
+      fileNameDisplay.textContent = '';
+      uploadBtn.style.display = 'none';
+
+    } catch (err) {
+      console.error(err);
+      showResult('Error processing CSV: ' + err.message, false);
+    }
+  }
+
+  function showResult(msg, isSuccess) {
+    resultDiv.innerHTML = msg;
+    resultDiv.className = isSuccess ? 'success' : 'error';
+    resultDiv.style.display = 'block';
+  }
+</script>
+
+</body>
+</html>
