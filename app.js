@@ -1091,7 +1091,6 @@
     renderProducts();
     updateCartUI();
     renderAdminProducts();
-    updateStats();
 
     showToast("info", "Product Deleted", p.name);
   }
@@ -1174,7 +1173,6 @@
     renderLabelPills();
     renderFilterPills();
     renderProducts();
-    updateStats();
     renderAdminProducts();
     resetAdminForm();
     switchAdminTab("products");
@@ -1582,7 +1580,6 @@
             renderFilterPills();
             renderProducts();
             renderAdminProducts();
-            updateStats();
 
             showToast("success", "Bulk Upload Complete", `Added: ${added}, Updated: ${updated}`);
             adminBulkUploadInput.value = "";

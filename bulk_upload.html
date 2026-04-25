@@ -218,7 +218,7 @@
 
   async function processCSVContent(csvText) {
     try {
-      const lines = csvText.split('\\n');
+      const lines = csvText.split('\n');
       if (lines.length < 2) {
         showResult('CSV file appears to be empty or has only headers.', false);
         return;
