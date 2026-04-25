@@ -1462,7 +1462,6 @@
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, width, height);
           uploadedImageDataUrl = canvas.toDataURL("image/jpeg", 0.7); // Convert to JPEG 70% to save space
-          formImagePreview.src = uploadedImageDataUrl;
           formImagePreview.style.display = "block";
         };
         img.src = event.target.result;
@@ -1483,9 +1482,9 @@
 
     if (adminBulkSampleBtn) {
       adminBulkSampleBtn.addEventListener("click", () => {
-        const header = "ID,Name,Composition,Description,Price,Category,Labels,Packaging,Badge\\n";
-        const sampleRow1 = "CR-TAB-101,New Paracetamol 500mg,Paracetamol IP 500mg,Effective relief from fever.,35.00,Tablets,General,Strip of 10 tablets,New\\n";
-        const sampleRow2 = "CR-SYR-102,Cough Syrup,Dextromethorphan,Relief from cough.,75.00,Syrups,General;Pediatric,100ml bottle,\\n";
+        const header = "ID,Name,Composition,Description,Price,Category,Labels,Packaging,Badge\n";
+        const sampleRow1 = "CR-TAB-101,New Paracetamol 500mg,Paracetamol IP 500mg,Effective relief from fever.,35.00,Tablets,General,Strip of 10 tablets,New\n";
+        const sampleRow2 = "CR-SYR-102,Cough Syrup,Dextromethorphan,Relief from cough.,75.00,Syrups,General;Pediatric,100ml bottle,\n";
         
         const blob = new Blob([header + sampleRow1 + sampleRow2], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
@@ -1506,10 +1505,10 @@
         if (!file) return;
 
         const reader = new FileReader();
-        reader.onload = function(event) {
+        reader.onload = async function(event) {
           try {
             const csvText = event.target.result;
-            const lines = csvText.split('\\n');
+            const lines = csvText.split('\n');
             if (lines.length < 2) throw new Error("File is empty or missing data rows.");
 
             function parseCSVLine(line) {
@@ -1567,6 +1566,17 @@
             saveToStorage('cr_categories', dynamicCategories);
             saveToStorage('cr_labels', dynamicLabels);
             
+            if (useRemote && supabaseClient) {
+              showToast("info", "Syncing", "Syncing with database...");
+              const { error } = await supabaseClient.from('products').upsert(newProducts);
+              if (error) {
+                showToast("error", "Database Sync Error", "Saved locally, but failed to sync with database.");
+                console.error(error);
+              } else {
+                showToast("success", "Database Synced", "All products successfully synced to database.");
+              }
+            }
+
             populateAdminFilters();
             renderLabelPills();
             renderFilterPills();

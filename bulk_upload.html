@@ -122,6 +122,7 @@
       color: #e11d48;
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -155,6 +156,11 @@
 </div>
 
 <script>
+  // Supabase Configuration
+  const SUPABASE_URL = 'https://ernnvnruesxnroquvede.supabase.co'; 
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVybm52bnJ1ZXN4bnJvcXV2ZWRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMzc2OTYsImV4cCI6MjA5MjYxMzY5Nn0.4wMpVSUPgihN3HwBvNvEk-SOSWFfEhj9Tb0mkeM7qXg';
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
   // Default image map by category (copied from app.js)
   const CATEGORY_IMAGES = {
     "Tablets": "assets/pharma_tablets.png",
@@ -200,9 +206,9 @@
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = async function(e) {
       const text = e.target.result;
-      processCSV(text);
+      await processCSVContent(text);
     };
     reader.onerror = function() {
       showResult('Error reading the file.', false);
@@ -210,7 +216,7 @@
     reader.readAsText(file);
   });
 
-  function processCSV(csvText) {
+  async function processCSVContent(csvText) {
     try {
       const lines = csvText.split('\\n');
       if (lines.length < 2) {
@@ -352,7 +358,18 @@
       localStorage.setItem('cr_categories', JSON.stringify(existingCategories));
       localStorage.setItem('cr_labels', JSON.stringify(existingLabelsMap));
 
-      showResult(`✅ Successfully processed! Added: ${added}, Updated: ${updated}. <br><br>You can now go back to the catalog to see your new products.`, true);
+      // Sync with Supabase
+      let syncStatus = "";
+      try {
+        const { error } = await supabaseClient.from('products').upsert(newProducts);
+        if (error) throw error;
+        syncStatus = "<br><span style='color: var(--success)'>✔️ Successfully synced with cloud database.</span>";
+      } catch (err) {
+        console.error('Supabase sync error:', err);
+        syncStatus = "<br><span style='color: #ef4444'>⚠️ Warning: Saved locally but failed to sync with cloud database. Please check your connection.</span>";
+      }
+
+      showResult(`✅ Successfully processed! Added: ${added}, Updated: ${updated}. ${syncStatus} <br><br>You can now go back to the catalog to see your new products.`, true);
       
       // Reset input
       fileInput.value = '';
