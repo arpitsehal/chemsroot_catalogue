@@ -7,7 +7,7 @@
   <meta name="description" content="Browse the complete Chems Root Pharmaceutical product catalog. Select from tablets, capsules, syrups, injections, topical creams and more. Place your order online." />
   <meta name="theme-color" content="#00A99D" />
   <link rel="icon" type="image/jpeg" href="assets/logo.jpg" />
-  <link rel="stylesheet" href="index.css" />
+  <link rel="stylesheet" href="index.css?v=1.4" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
@@ -73,13 +73,17 @@
   <!-- ====== PRODUCTS ====== -->
   <section class="products-section" id="products-section">
     <div class="products-header">
-      <h2 id="products-heading">All Products</h2>
-      <span class="product-count" id="product-count">20 products</span>
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <h2 id="products-heading">All Products</h2>
+        <span class="product-count" id="product-count">20 products</span>
     </div>
     <div class="product-grid" id="product-grid">
       <!-- Rendered by JS -->
     </div>
   </section>
+
+  <!-- ====== PRINTABLE CATALOGUE (Hidden) ====== -->
+  <div id="printable-catalogue" style="display:none;"></div>
 
   <!-- ====== CART OVERLAY + PANEL ====== -->
   <div class="cart-overlay" id="cart-overlay"></div>
@@ -203,6 +207,7 @@
         <button class="modal-btn secondary" id="admin-bulk-upload-btn" style="padding: 6px 12px; font-size: 0.85rem; height: auto; margin-right: 4px;" title="Upload CSV">📁 Bulk Upload</button>
         <button class="modal-btn secondary" id="admin-bulk-sample-btn" style="padding: 6px 12px; font-size: 0.85rem; height: auto; margin-right: 8px;" title="Download Sample CSV">⬇️ Sample CSV</button>
         <button class="modal-btn secondary" id="admin-seed-supabase-btn" style="padding: 6px 12px; font-size: 0.85rem; height: auto; margin-right: 8px; background: #3ECF8E; color: white;" title="Seed Supabase from products.js">🌱 Seed Supabase</button>
+        <button class="modal-btn secondary" id="download-catalogue-btn" style="padding: 6px 12px; font-size: 0.85rem; height: auto; margin-right: 8px; background: #00A99D; color: white; display:flex; align-items:center; gap:6px;" title="Download Product Catalogue PDF">📄 Download Catalogue</button>
         <button class="close-cart-btn" id="close-admin-btn" aria-label="Close">✕</button>
       </div>
     </div>
@@ -363,6 +368,6 @@
   <!-- ====== SCRIPTS ====== -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="products.js"></script>
-  <script src="app.js"></script>
+  <script src="app.js?v=1.4"></script>
 </body>
 </html>

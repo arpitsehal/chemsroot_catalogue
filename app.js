@@ -219,6 +219,9 @@
   // Toast
   const toastContainer = $("#toast-container");
 
+  // Catalogue
+  const downloadCatalogueBtn = $("#download-catalogue-btn");
+
   // ── Init ───────────────────────────────────────────────
   async function init() {
     if (useRemote && supabaseClient) {
@@ -772,6 +775,104 @@
     window.open(url, '_blank');
   }
 
+  // ── Download Product List (Catalogue) ──────────────────
+  function generateCatalogueHTML(productList) {
+    const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    // Group products by category, preserving insertion order
+    const grouped = {};
+    productList.forEach(p => {
+      const cat = p.category || 'Other';
+      if (!grouped[cat]) grouped[cat] = [];
+      grouped[cat].push(p);
+    });
+
+    let serialNo = 0;
+    let tableRows = '';
+
+    Object.entries(grouped).forEach(([category, items]) => {
+      // Dark category heading row spanning all columns
+      tableRows += `
+        <tr class="cat-heading-row">
+          <td colspan="7" class="cat-heading-cell">📦 ${category.toUpperCase()}</td>
+        </tr>`;
+
+      items.forEach(p => {
+        serialNo++;
+        const formattedComp = p.composition.split(',').map(item => item.trim()).join('<br>');
+        tableRows += `
+          <tr>
+            <td>${serialNo}</td>
+            <td class="prod-name">${p.name.toUpperCase()}</td>
+            <td class="prod-comp">${formattedComp}</td>
+            <td>${p.category}</td>
+            <td>${(p.labels || []).join(', ')}</td>
+            <td>${p.packaging}</td>
+            <td style="text-align: right;" class="prod-price">${p.price.toFixed(2)}</td>
+          </tr>`;
+      });
+    });
+
+    return `
+      <div class="catalogue-wrapper">
+        <div class="catalogue-header">
+          <div class="catalogue-header-left">
+            <img src="assets/logo.jpg" alt="Chems Root Logo" />
+            <div class="catalogue-title">
+              <h1>Chems Root Pharmaceutical</h1>
+              <p>Product Catalogue &amp; Price List</p>
+            </div>
+          </div>
+          <div style="text-align: right; font-size: 0.85rem; color: #4b5563;">
+            <div><strong>Date:</strong> ${today}</div>
+            <div><strong>Total Products:</strong> ${productList.length}</div>
+          </div>
+        </div>
+
+        <table class="catalogue-table">
+          <thead>
+            <tr>
+              <th style="width: 40px;">S.NO</th>
+              <th style="width: 200px;">PRODUCT NAME</th>
+              <th>COMPOSITION</th>
+              <th style="width: 100px;">CATEGORY</th>
+              <th style="width: 120px;">SPECIALTY</th>
+              <th style="width: 100px;">PACKAGING</th>
+              <th style="width: 90px; text-align: right;">MRP (₹)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+
+        <div class="catalogue-footer">
+          <p>© 2026 Chems Root Pharmaceutical. Quality healthcare products trusted by professionals.</p>
+          <p style="font-size: 0.7rem; margin-top: 5px;">This is a computer-generated document.</p>
+        </div>
+      </div>
+    `;
+  }
+
+  function downloadCatalogue() {
+    const printableEl = document.getElementById("printable-catalogue");
+    if (!printableEl) return;
+    
+    showToast("info", "Preparing Catalogue", "Generating your product list...");
+    
+    // Use the current filtered list or all products?
+    // The user said "fetch all the products", so I'll use the full list.
+    const productList = products; 
+    
+    printableEl.innerHTML = generateCatalogueHTML(productList);
+    
+    // Wait a bit for any images or styles to settle
+    setTimeout(() => {
+      window.print();
+      showToast("success", "Success", "Catalogue ready for download.");
+    }, 500);
+  }
+
   // ── Admin Login (Username + Password) ──────────────────
   function openAdminLogin() {
     adminLoginModal.classList.add("open");
@@ -1229,6 +1330,11 @@
         renderProducts();
       }, 200);
     });
+
+    // ── Catalog: Download ──
+    if (downloadCatalogueBtn) {
+      downloadCatalogueBtn.addEventListener("click", downloadCatalogue);
+    }
 
     // ── Catalog: Add to cart ──
     productGrid.addEventListener("click", (e) => {
