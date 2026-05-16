@@ -779,6 +779,13 @@
   function generateCatalogueHTML(productList) {
     const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 
+    // Sort productList alphabetically by composition
+    productList.sort((a, b) => {
+      const compA = (a.composition || "").toLowerCase();
+      const compB = (b.composition || "").toLowerCase();
+      return compA.localeCompare(compB);
+    });
+
     // Group products by category, preserving insertion order
     const grouped = {};
     productList.forEach(p => {
