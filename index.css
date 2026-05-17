@@ -66,7 +66,7 @@ body {
   background: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
-  min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
 }
 body::before {
@@ -279,6 +279,7 @@ input, select, textarea { font-family: inherit; outline: none; }
 
 .cart-panel {
   position: fixed; top: 0; right: 0; bottom: 0; width: min(440px, 90vw);
+  height: 100dvh; max-height: 100dvh;
   background: var(--bg-secondary); border-left: 1px solid var(--border-subtle);
   z-index: 201; transform: translateX(100%); transition: transform var(--transition-slow);
   display: flex; flex-direction: column;
@@ -342,7 +343,7 @@ input, select, textarea { font-family: inherit; outline: none; }
    ========================================================== */
 .modal-overlay {
   position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px);
-  z-index: 300; display: flex; align-items: center; justify-content: center;
+  z-index: 300; display: flex; align-items: center; justify-content: center; height: 100dvh;
   opacity: 0; visibility: hidden; transition: all var(--transition-normal); padding: var(--space-lg);
 }
 .modal-overlay.open { opacity: 1; visibility: visible; }
@@ -350,6 +351,7 @@ input, select, textarea { font-family: inherit; outline: none; }
 .modal {
   background: var(--bg-secondary); border: 1px solid var(--border-medium);
   border-radius: var(--radius-xl); padding: var(--space-2xl); width: 100%; max-width: 420px;
+  max-height: 85dvh; overflow-y: auto; overscroll-behavior: contain;
   transform: scale(0.9) translateY(20px); transition: transform var(--transition-slow); position: relative;
 }
 .modal-overlay.open .modal { transform: scale(1) translateY(0); }
@@ -460,7 +462,7 @@ input, select, textarea { font-family: inherit; outline: none; }
    ADMIN PANEL
    ========================================================== */
 .admin-panel {
-  position: fixed; inset: 0; z-index: 250;
+  position: fixed; inset: 0; z-index: 250; height: 100dvh; max-height: 100dvh;
   background: var(--bg-primary); overflow: hidden;
   transform: translateY(100%); transition: transform var(--transition-slow);
   display: flex; flex-direction: column;
@@ -696,4 +698,21 @@ input, select, textarea { font-family: inherit; outline: none; }
   .cart-panel { width: 100vw; }
   .toast-container { left: 16px; right: 16px; bottom: 16px; }
   .toast { min-width: auto; }
+  
+  /* Compact Modal for Mobile (To prevent scrolling) */
+  .modal { padding: var(--space-md); }
+  .modal-close { top: 8px; right: 8px; width: 28px; height: 28px; font-size: 0.9rem; }
+  .modal-icon { width: 44px; height: 44px; font-size: 1.3rem; margin-bottom: var(--space-sm); }
+  .modal h2 { font-size: 1.1rem; margin-bottom: 2px; }
+  .modal .modal-subtitle { font-size: 0.75rem; margin-bottom: var(--space-md); line-height: 1.3; }
+  
+  .input-group { margin-bottom: var(--space-sm); }
+  .input-group label { margin-bottom: 4px; font-size: 0.75rem; }
+  .input-group input, .input-group select, .input-group textarea { padding: 10px 12px; font-size: 0.85rem; }
+  
+  .modal-btn { padding: 12px; margin-top: var(--space-xs); font-size: 0.9rem; }
+  
+  .success-icon { width: 50px; height: 50px; font-size: 1.5rem; margin-bottom: var(--space-sm); }
+  .order-confirmation { padding: 10px; margin-bottom: 10px; font-size: 0.8rem; }
+  .order-confirmation .order-id { margin-bottom: 8px; }
 }
