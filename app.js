@@ -894,15 +894,15 @@
   function generateImageCatalogueHTML(productList) {
     const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 
-    // Sort productList alphabetically by name
+    // Sort productList alphabetically by composition
     const sortedList = [...productList].sort((a, b) => {
-      return (a.name || "").localeCompare(b.name || "");
+      return (a.composition || "").localeCompare(b.composition || "");
     });
 
     const gridHTML = sortedList.map(p => `
       <div class="image-catalogue-item">
-        <img src="${p.image}" alt="${p.name}" />
-        <div class="prod-name">${p.name.toUpperCase()}</div>
+        <img src="${p.image}" alt="${p.composition}" />
+        <div class="prod-name">${p.composition.toUpperCase()}</div>
         <div class="prod-price">MRP ₹${p.price.toFixed(2)}</div>
       </div>
     `).join("");
