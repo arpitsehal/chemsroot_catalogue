@@ -221,6 +221,7 @@
 
   // Catalogue
   const downloadCatalogueBtn = $("#download-catalogue-btn");
+  const downloadImageCatalogueBtn = $("#download-image-catalogue-btn");
 
   // ── Init ───────────────────────────────────────────────
   async function init() {
@@ -890,6 +891,64 @@
     }, 500);
   }
 
+  function generateImageCatalogueHTML(productList) {
+    const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    // Sort productList alphabetically by name
+    const sortedList = [...productList].sort((a, b) => {
+      return (a.name || "").localeCompare(b.name || "");
+    });
+
+    const gridHTML = sortedList.map(p => `
+      <div class="image-catalogue-item">
+        <img src="${p.image}" alt="${p.name}" />
+        <div class="prod-name">${p.name.toUpperCase()}</div>
+        <div class="prod-price">MRP ₹${p.price.toFixed(2)}</div>
+      </div>
+    `).join("");
+
+    return `
+      <div class="catalogue-wrapper">
+        <div class="catalogue-header">
+          <div class="catalogue-header-left">
+            <img src="assets/logo.jpg" alt="Chems Root Logo" />
+            <div class="catalogue-title">
+              <h1>Chems Root Pharmaceutical</h1>
+              <p>Image Catalogue &amp; Price List</p>
+            </div>
+          </div>
+          <div style="text-align: right; font-size: 0.85rem; color: #4b5563;">
+            <div><strong>Date:</strong> ${today}</div>
+            <div><strong>Total Products:</strong> ${sortedList.length}</div>
+          </div>
+        </div>
+        <div class="image-catalogue-grid">
+          ${gridHTML}
+        </div>
+        <div class="catalogue-footer">
+          <p>© 2026 Chems Root Pharmaceutical. Quality healthcare products trusted by professionals.</p>
+          <p style="font-size: 0.7rem; margin-top: 5px;">This is a computer-generated document.</p>
+        </div>
+      </div>
+    `;
+  }
+
+  function downloadImageCatalogue() {
+    const printableEl = document.getElementById("printable-catalogue");
+    if (!printableEl) return;
+    
+    showToast("info", "Preparing Image Catalogue", "Generating your image catalogue...");
+    
+    const productList = products; 
+    printableEl.innerHTML = generateImageCatalogueHTML(productList);
+    
+    // Wait a bit for images to load before printing
+    setTimeout(() => {
+      window.print();
+      showToast("success", "Success", "Image Catalogue ready for download.");
+    }, 1500);
+  }
+
   // ── Admin Login (Username + Password) ──────────────────
   function openAdminLogin() {
     adminLoginModal.classList.add("open");
@@ -1351,6 +1410,9 @@
     // ── Catalog: Download ──
     if (downloadCatalogueBtn) {
       downloadCatalogueBtn.addEventListener("click", downloadCatalogue);
+    }
+    if (downloadImageCatalogueBtn) {
+      downloadImageCatalogueBtn.addEventListener("click", downloadImageCatalogue);
     }
 
     // ── Catalog: Add to cart ──
