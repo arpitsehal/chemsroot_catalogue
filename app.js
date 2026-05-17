@@ -797,7 +797,17 @@
     let serialNo = 0;
     let tableRows = '';
 
-    Object.entries(grouped).forEach(([category, items]) => {
+    const targetOrder = ["Tablets", "Capsules", "Syrups"];
+    const entries = Object.entries(grouped).sort((a, b) => {
+      const idxA = targetOrder.indexOf(a[0]);
+      const idxB = targetOrder.indexOf(b[0]);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      return a[0].localeCompare(b[0]);
+    });
+
+    entries.forEach(([category, items]) => {
       // Dark category heading row spanning all columns
       tableRows += `
         <tr class="cat-heading-row">
