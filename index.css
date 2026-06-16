@@ -206,6 +206,17 @@ input, select, textarea { font-family: inherit; outline: none; }
 .products-header-titles { display: flex; flex-direction: column; gap: 4px; }
 .products-header h2 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.01em; }
 .product-count { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+.catalogue-actions { display: flex; gap: var(--space-sm); flex-wrap: wrap; }
+.catalogue-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 16px; border-radius: var(--radius-full);
+  background: var(--brand-teal); color: #fff;
+  font-size: 0.8rem; font-weight: 700; white-space: nowrap;
+  box-shadow: var(--shadow-sm); transition: all var(--transition-fast);
+}
+.catalogue-btn:hover { background: var(--brand-teal-dark); box-shadow: 0 6px 16px var(--brand-teal-glow); transform: translateY(-1px); }
+.catalogue-btn.alt { background: #fff; color: var(--brand-teal-dark); border: 1px solid var(--border-medium); }
+.catalogue-btn.alt:hover { background: var(--bg-card-hover); border-color: var(--border-accent); color: var(--brand-teal-dark); }
 .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-lg); max-width: var(--max-width); margin: 0 auto; }
 
 /* Product Card */
@@ -706,6 +717,8 @@ input, select, textarea { font-family: inherit; outline: none; }
   .product-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--space-md); }
   .products-header { flex-direction: column; align-items: flex-start; gap: var(--space-md); }
   #download-catalogue-btn { width: 100%; justify-content: center; }
+  .catalogue-actions { width: 100%; }
+  .catalogue-btn { flex: 1; justify-content: center; }
   .admin-header { flex-direction: column; align-items: flex-start; }
   .admin-header-right { flex-wrap: wrap; width: 100%; }
   .admin-toolbar { flex-direction: column; }

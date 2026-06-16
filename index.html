@@ -7,7 +7,7 @@
   <meta name="description" content="Browse the complete Chems Root Pharmaceutical product catalog. Select from tablets, capsules, syrups, injections, topical creams and more. Place your order online." />
   <meta name="theme-color" content="#00A99D" />
   <link rel="icon" type="image/jpeg" href="assets/logo.jpg" />
-  <link rel="stylesheet" href="index.css?v=3.0" />
+  <link rel="stylesheet" href="index.css?v=3.1" />
 </head>
 <body>
 
@@ -75,6 +75,14 @@
       <div class="products-header-titles">
         <h2 id="products-heading">All Products</h2>
         <span class="product-count" id="product-count">20 products</span>
+      </div>
+      <div class="catalogue-actions">
+        <button class="catalogue-btn" id="public-download-catalogue-btn" title="Download the full product & price list">
+          <span>📄</span> Download Catalogue
+        </button>
+        <button class="catalogue-btn alt" id="public-download-image-catalogue-btn" title="Download the image catalogue">
+          <span>🖼️</span> Image Catalogue
+        </button>
       </div>
     </div>
     <div class="product-grid" id="product-grid">
@@ -368,6 +376,6 @@
 
   <!-- ====== SCRIPTS ====== -->
   <!-- ES modules; Supabase SDK + html2canvas are loaded lazily on demand from within js/. -->
-  <script type="module" src="js/main.js?v=3.0"></script>
+  <script type="module" src="js/main.js?v=3.1"></script>
 </body>
 </html>
