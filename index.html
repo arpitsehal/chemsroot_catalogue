@@ -7,8 +7,7 @@
   <meta name="description" content="Browse the complete Chems Root Pharmaceutical product catalog. Select from tablets, capsules, syrups, injections, topical creams and more. Place your order online." />
   <meta name="theme-color" content="#00A99D" />
   <link rel="icon" type="image/jpeg" href="assets/logo.jpg" />
-  <link rel="stylesheet" href="index.css?v=1.4" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <link rel="stylesheet" href="index.css?v=3.0" />
 </head>
 <body>
 
@@ -73,9 +72,10 @@
   <!-- ====== PRODUCTS ====== -->
   <section class="products-section" id="products-section">
     <div class="products-header">
-      <div style="display:flex; flex-direction:column; gap:4px;">
+      <div class="products-header-titles">
         <h2 id="products-heading">All Products</h2>
         <span class="product-count" id="product-count">20 products</span>
+      </div>
     </div>
     <div class="product-grid" id="product-grid">
       <!-- Rendered by JS -->
@@ -367,8 +367,7 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- ====== SCRIPTS ====== -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="products.js"></script>
-  <script src="app.js?v=1.5"></script>
+  <!-- ES modules; Supabase SDK + html2canvas are loaded lazily on demand from within js/. -->
+  <script type="module" src="js/main.js?v=3.0"></script>
 </body>
 </html>

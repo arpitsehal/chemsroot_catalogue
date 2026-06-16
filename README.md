@@ -30,21 +30,46 @@ A professional, feature-rich B2B pharmaceutical product catalog and order manage
 - **Order Management**: Track and view all incoming orders from customers.
 
 ## 🛠️ Technology Stack
-- **Frontend**: HTML5, Vanilla CSS3 (Custom Design System), Modern JavaScript (ES6+).
-- **Libraries**: `html2canvas` (for receipt image generation).
-- **Storage**: `localStorage` (Browser-based persistence for products and orders).
-- **Design**: Premium, responsive UI with smooth transitions and micro-animations.
+- **Frontend**: HTML5, Vanilla CSS3 (clean light-pharma design system), Modern JavaScript (ES Modules).
+- **Architecture**: `app.js` was refactored from a single 1,700-line file into focused ES modules under `js/`.
+- **Libraries**: `html2canvas` and `@supabase/supabase-js` are **lazy-loaded on demand** (dynamic `import` from a CDN) so they never block first paint.
+- **Storage**: `localStorage` (offline-first), with optional Supabase sync that runs in the background after the page has already rendered.
+- **Design**: Responsive, accessible light UI with smooth transitions and micro-animations.
+
+### 📁 Project Structure
+```
+index.html          Markup + module entry point
+index.css           Light-pharma design system
+js/
+  main.js           Entry point: bootstraps render + wires events
+  store.js          Central state + localStorage persistence
+  dom.js            Cached DOM references
+  data.js           Seed products, categories, labels, constants
+  catalog.js        Product grid, filters, search
+  cart.js           Cart state + cart panel
+  customer.js       Login, checkout, receipts, dashboard
+  admin.js          Admin login, product CRUD, orders, bulk CSV
+  exports.js        Printable product / image catalogues
+  supabase.js       Lazy Supabase sync layer
+  utils.js          Toasts, dates, search highlighting
+```
 
 ## 🚀 Getting Started
 
 ### Installation
-Since this is a purely frontend application, there is no complex installation required.
+The app now uses **ES Modules**, which browsers only load over `http(s)://` — not by double-clicking the file (`file://`). Serve the folder with any static server:
 
 1. Clone the repository:
    ```bash
    git clone https://github.com/your-username/chems-root-catalog.git
+   cd chems-root-catalog
    ```
-2. Open `index.html` in any modern web browser.
+2. Start a local server (pick one):
+   ```bash
+   npx serve .          # Node
+   python -m http.server # Python 3
+   ```
+   …or use the VS Code **Live Server** extension. Then open the printed URL (e.g. `http://localhost:3000`).
 
 ### Deployment
 The application is ready for instant deployment to static hosting platforms:
