@@ -120,7 +120,6 @@ function bindEvents() {
   dom.downloadCatalogueBtn?.addEventListener("click", downloadCatalogue);
   dom.downloadImageCatalogueBtn?.addEventListener("click", downloadImageCatalogue);
   dom.publicDownloadCatalogueBtn?.addEventListener("click", downloadCatalogue);
-  dom.publicDownloadImageCatalogueBtn?.addEventListener("click", downloadImageCatalogue);
 
   // ── Catalog: add to cart / update qty ──
   dom.productGrid.addEventListener("click", (e) => {

@@ -1,7 +1,68 @@
-/* Printable product catalogue + image catalogue (window.print). */
+/* Printable product catalogue + image catalogue.
+   Renders into a dedicated print window (reliable across browsers,
+   no dependence on the page's @media print rules). */
 import { state } from "./store.js";
-import { dom } from "./dom.js";
 import { showToast } from "./utils.js";
+
+/* Self-contained styles for the print window. */
+const PRINT_CSS = `
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #111827; background: #fff; padding: 32px; }
+  .catalogue-wrapper { max-width: 1000px; margin: 0 auto; }
+  .catalogue-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #00A99D; padding-bottom: 20px; margin-bottom: 30px; }
+  .catalogue-header-left { display: flex; align-items: center; gap: 20px; }
+  .catalogue-header-left img { height: 70px; border-radius: 8px; }
+  .catalogue-title h1 { font-size: 2rem; color: #008075; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+  .catalogue-title p { margin: 5px 0 0; color: #6b7280; font-weight: 600; font-size: 0.9rem; }
+  .catalogue-meta { text-align: right; font-size: 0.85rem; color: #4b5563; }
+  .catalogue-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.85rem; }
+  .catalogue-table th { background: #00A99D; color: #fff; padding: 12px; text-align: left; font-weight: 700; text-transform: uppercase; border: 1px solid #008075; }
+  .catalogue-table td { padding: 12px; border: 1px solid #e5e7eb; vertical-align: top; color: #374151; }
+  .catalogue-table tr:nth-child(even) { background: #f9fafb; }
+  .catalogue-table .prod-name { font-weight: 800; color: #111827; font-size: 1rem; line-height: 1.2; }
+  .catalogue-table .prod-comp { font-style: italic; color: #4b5563; font-size: 0.8rem; line-height: 1.5; }
+  .catalogue-table .prod-price { font-weight: 800; color: #008075; white-space: nowrap; }
+  .catalogue-table .col-price { text-align: right; }
+  .catalogue-table .cat-heading-row { break-inside: avoid; page-break-inside: avoid; }
+  .catalogue-table .cat-heading-cell { background: #1a2940; color: #fff; font-size: 1rem; font-weight: 800; letter-spacing: 0.08em; padding: 12px 16px; border: 1px solid #0f1a2e; text-transform: uppercase; }
+  .catalogue-table tr { page-break-inside: avoid; break-inside: avoid; }
+  .catalogue-footer { margin-top: 24px; text-align: center; border-top: 1px solid #e5e7eb; padding-top: 16px; color: #9CA3AF; font-size: 0.8rem; }
+  .catalogue-footer .footer-fine { font-size: 0.7rem; margin-top: 5px; }
+  .image-catalogue-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 20px; }
+  .image-catalogue-item { border: 1px solid #e5e7eb; padding: 10px; border-radius: 8px; text-align: center; break-inside: avoid; page-break-inside: avoid; background: #fff; }
+  .image-catalogue-item img { width: 100%; height: 120px; object-fit: contain; margin-bottom: 10px; }
+  .image-catalogue-item .prod-name { font-size: 0.9rem; font-weight: 800; color: #111827; margin-bottom: 4px; min-height: 2.4em; }
+  .image-catalogue-item .prod-price { font-size: 0.95rem; font-weight: 700; color: #00A99D; }
+  @page { margin: 1.5cm; size: A4; }
+`;
+
+/* Absolute logo URL so it resolves inside the new window too. */
+function logoURL() {
+  return new URL("assets/logo.jpg", window.location.href).href;
+}
+
+/* Open a print window with the given catalogue HTML and trigger print
+   once it has loaded. window.open is called synchronously from the
+   click handler so pop-up blockers allow it. */
+function openPrintWindow(title, bodyHTML) {
+  const win = window.open("", "_blank");
+  if (!win) {
+    showToast("error", "Pop-up Blocked", "Please allow pop-ups for this site to download the catalogue.");
+    return;
+  }
+  win.document.open();
+  win.document.write(
+    `<!doctype html><html lang="en"><head><meta charset="utf-8" />` +
+      `<title>${title}</title><style>${PRINT_CSS}</style></head>` +
+      `<body>${bodyHTML}</body></html>`
+  );
+  win.document.close();
+  win.focus();
+
+  const triggerPrint = () => setTimeout(() => win.print(), 350);
+  if (win.document.readyState === "complete") triggerPrint();
+  else win.addEventListener("load", triggerPrint);
+}
 
 function generateCatalogueHTML(productList) {
   const today = new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
@@ -53,7 +114,7 @@ function generateCatalogueHTML(productList) {
     <div class="catalogue-wrapper">
       <div class="catalogue-header">
         <div class="catalogue-header-left">
-          <img src="assets/logo.jpg" alt="Chems Root Logo" />
+          <img src="${logoURL()}" alt="Chems Root Logo" />
           <div class="catalogue-title">
             <h1>Chems Root Pharmaceutical</h1>
             <p>Product Catalogue &amp; Price List</p>
@@ -88,13 +149,8 @@ function generateCatalogueHTML(productList) {
 }
 
 export function downloadCatalogue() {
-  if (!dom.printableCatalogue) return;
-  showToast("info", "Preparing Catalogue", "Generating your product list...");
-  dom.printableCatalogue.innerHTML = generateCatalogueHTML(state.products);
-  setTimeout(() => {
-    window.print();
-    showToast("success", "Success", "Catalogue ready for download.");
-  }, 500);
+  showToast("info", "Preparing Catalogue", "Opening your product list...");
+  openPrintWindow("Chems Root — Product Catalogue", generateCatalogueHTML(state.products));
 }
 
 function generateImageCatalogueHTML(productList) {
@@ -107,7 +163,7 @@ function generateImageCatalogueHTML(productList) {
     .map(
       (p) => `
       <div class="image-catalogue-item">
-        <img src="${p.image}" alt="${p.composition}" />
+        <img src="${new URL(p.image, window.location.href).href}" alt="${p.composition}" />
         <div class="prod-name">${p.composition.toUpperCase()}</div>
         <div class="prod-price">MRP ₹${p.price.toFixed(2)}</div>
       </div>`
@@ -118,7 +174,7 @@ function generateImageCatalogueHTML(productList) {
     <div class="catalogue-wrapper">
       <div class="catalogue-header">
         <div class="catalogue-header-left">
-          <img src="assets/logo.jpg" alt="Chems Root Logo" />
+          <img src="${logoURL()}" alt="Chems Root Logo" />
           <div class="catalogue-title">
             <h1>Chems Root Pharmaceutical</h1>
             <p>Image Catalogue &amp; Price List</p>
@@ -138,11 +194,6 @@ function generateImageCatalogueHTML(productList) {
 }
 
 export function downloadImageCatalogue() {
-  if (!dom.printableCatalogue) return;
-  showToast("info", "Preparing Image Catalogue", "Generating your image catalogue...");
-  dom.printableCatalogue.innerHTML = generateImageCatalogueHTML(state.products);
-  setTimeout(() => {
-    window.print();
-    showToast("success", "Success", "Image Catalogue ready for download.");
-  }, 1500);
+  showToast("info", "Preparing Image Catalogue", "Opening your image catalogue...");
+  openPrintWindow("Chems Root — Image Catalogue", generateImageCatalogueHTML(state.products));
 }

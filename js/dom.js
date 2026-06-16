@@ -108,7 +108,6 @@ export const dom = {
   downloadImageCatalogueBtn: $("#download-image-catalogue-btn"),
   // Catalogue export (public, main catalog header)
   publicDownloadCatalogueBtn: $("#public-download-catalogue-btn"),
-  publicDownloadImageCatalogueBtn: $("#public-download-image-catalogue-btn"),
   printableCatalogue: $("#printable-catalogue"),
 
   // Image zoom
