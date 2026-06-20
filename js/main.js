@@ -26,7 +26,7 @@ import {
   downloadReceiptImage,
   shareOrderWhatsApp,
 } from "./customer.js";
-import { downloadCatalogue, downloadImageCatalogue } from "./exports.js";
+import { downloadCatalogue, downloadImageCatalogue } from "./exports.js?v=3.3";
 import {
   renderFormLabels,
   removeFormLabel,

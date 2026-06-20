@@ -33,6 +33,17 @@ const PRINT_CSS = `
   .image-catalogue-item img { width: 100%; height: 120px; object-fit: contain; margin-bottom: 10px; }
   .image-catalogue-item .prod-name { font-size: 0.9rem; font-weight: 800; color: #111827; margin-bottom: 4px; min-height: 2.4em; }
   .image-catalogue-item .prod-price { font-size: 0.95rem; font-weight: 700; color: #00A99D; }
+
+  /* Image catalogue — specialty grouped, 6 images per page */
+  .img-cat-page { break-inside: avoid; page-break-inside: avoid; }
+  .img-cat-page + .img-cat-page { break-before: page; page-break-before: always; }
+  .img-cat-spec-heading { background: #1a2940; color: #fff; font-size: 1rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 16px; border-radius: 6px; margin: 18px 0 14px; }
+  .img-cat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .img-cat-item { border: 1px solid #e5e7eb; padding: 12px; border-radius: 8px; text-align: center; break-inside: avoid; page-break-inside: avoid; background: #fff; }
+  .img-cat-item img { width: 100%; height: 160px; object-fit: contain; margin-bottom: 8px; }
+  .img-cat-item .ic-name { font-size: 0.9rem; font-weight: 800; color: #111827; line-height: 1.3; }
+  .img-cat-item .ic-sno { color: #008075; }
+  .img-cat-item .ic-comp { font-size: 0.78rem; font-style: italic; color: #4b5563; line-height: 1.45; margin-top: 4px; }
   @page { margin: 1.5cm; size: A4; }
 `;
 
@@ -153,21 +164,77 @@ export function downloadCatalogue() {
   openPrintWindow("Chems Root — Product Catalogue", generateCatalogueHTML(state.products));
 }
 
+/* Preferred specialty display order; any specialty not listed here is
+   appended afterwards in alphabetical order. */
+const SPECIALTY_ORDER = [
+  "General", "Gynecology", "Cardiac", "Neurology",
+  "Orthopedic", "Dermatology", "Pediatric", "Gastroenterology",
+];
+
+/* Max images per printed A4 page (2 columns × 3 rows). */
+const IMAGES_PER_PAGE = 6;
+
+function chunk(arr, size) {
+  const out = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+}
+
 function generateImageCatalogueHTML(productList) {
   const today = new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+
+  /* Alphabetical by composition, then grouped by primary specialty.
+     Grouping preserves the alphabetical order within each specialty. */
   const sortedList = [...productList].sort((a, b) =>
-    (a.composition || "").localeCompare(b.composition || "")
+    (a.composition || "").toLowerCase().localeCompare((b.composition || "").toLowerCase())
   );
 
-  const gridHTML = sortedList
-    .map(
-      (p) => `
-      <div class="image-catalogue-item">
-        <img src="${new URL(p.image, window.location.href).href}" alt="${p.composition}" />
-        <div class="prod-name">${p.composition.toUpperCase()}</div>
-        <div class="prod-price">MRP ₹${p.price.toFixed(2)}</div>
-      </div>`
-    )
+  const grouped = {};
+  sortedList.forEach((p) => {
+    const spec = (p.labels && p.labels[0]) ? p.labels[0] : "Other";
+    (grouped[spec] ||= []).push(p);
+  });
+
+  const specialties = Object.keys(grouped).sort((a, b) => {
+    const ia = SPECIALTY_ORDER.indexOf(a);
+    const ib = SPECIALTY_ORDER.indexOf(b);
+    if (ia !== -1 && ib !== -1) return ia - ib;
+    if (ia !== -1) return -1;
+    if (ib !== -1) return 1;
+    return a.localeCompare(b);
+  });
+
+  /* Build pages: each specialty is split into chunks of IMAGES_PER_PAGE so
+     no page ever shows more than 6 images. Continuation pages repeat the
+     specialty heading marked "(continued)". */
+  const pages = [];
+  specialties.forEach((spec) => {
+    chunk(grouped[spec], IMAGES_PER_PAGE).forEach((items, i) => {
+      pages.push({ spec, continued: i > 0, items });
+    });
+  });
+
+  let serialNo = 0;
+  const pagesHTML = pages
+    .map((pg) => {
+      const itemsHTML = pg.items
+        .map((p) => {
+          serialNo++;
+          const comp = (p.composition || "").split(",").map((s) => s.trim()).join(", ");
+          return `
+          <div class="img-cat-item">
+            <img src="${new URL(p.image, window.location.href).href}" alt="${p.name}" />
+            <div class="ic-name"><span class="ic-sno">${serialNo}.</span> ${p.name}</div>
+            <div class="ic-comp">${comp}</div>
+          </div>`;
+        })
+        .join("");
+      return `
+        <div class="img-cat-page">
+          <div class="img-cat-spec-heading">${pg.spec}${pg.continued ? " (continued)" : ""}</div>
+          <div class="img-cat-grid">${itemsHTML}</div>
+        </div>`;
+    })
     .join("");
 
   return `
@@ -177,7 +244,7 @@ function generateImageCatalogueHTML(productList) {
           <img src="${logoURL()}" alt="Chems Root Logo" />
           <div class="catalogue-title">
             <h1>Chems Root Pharmaceutical</h1>
-            <p>Image Catalogue &amp; Price List</p>
+            <p>Image Catalogue</p>
           </div>
         </div>
         <div class="catalogue-meta">
@@ -185,7 +252,7 @@ function generateImageCatalogueHTML(productList) {
           <div><strong>Total Products:</strong> ${sortedList.length}</div>
         </div>
       </div>
-      <div class="image-catalogue-grid">${gridHTML}</div>
+      ${pagesHTML}
       <div class="catalogue-footer">
         <p>© 2026 Chems Root Pharmaceutical. Quality healthcare products trusted by professionals.</p>
         <p class="footer-fine">This is a computer-generated document.</p>
