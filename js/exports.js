@@ -35,15 +35,20 @@ const PRINT_CSS = `
   .image-catalogue-item .prod-price { font-size: 0.95rem; font-weight: 700; color: #00A99D; }
 
   /* Image catalogue — specialty grouped, 6 images per page */
-  .img-cat-page { break-inside: avoid; page-break-inside: avoid; }
+  /* No break-inside:avoid on the page wrapper — it would bump the first grid
+     off the header page and leave a blank first sheet. break-before already
+     isolates every page after the first; per-item avoid keeps cards whole. */
   .img-cat-page + .img-cat-page { break-before: page; page-break-before: always; }
-  .img-cat-spec-heading { background: #1a2940; color: #fff; font-size: 1rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 16px; border-radius: 6px; margin: 18px 0 14px; }
-  .img-cat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-  .img-cat-item { border: 1px solid #e5e7eb; padding: 12px; border-radius: 8px; text-align: center; break-inside: avoid; page-break-inside: avoid; background: #fff; }
-  .img-cat-item img { width: 100%; height: 160px; object-fit: contain; margin-bottom: 8px; }
-  .img-cat-item .ic-name { font-size: 0.9rem; font-weight: 800; color: #111827; line-height: 1.3; }
+  .img-cat-spec-heading { background: #1a2940; color: #fff; font-size: 0.95rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 14px; border-radius: 6px; margin: 8px 0 10px; }
+  /* Two columns × four rows = 8 cards per page. Rows are a fixed height so a
+     long composition can't make one card taller than another and push the
+     8th card onto a near-empty next sheet. */
+  .img-cat-grid { display: grid; grid-template-columns: repeat(2, 1fr); grid-auto-rows: 1fr; gap: 12px; }
+  .img-cat-item { border: 1px solid #e5e7eb; padding: 8px; border-radius: 8px; text-align: center; break-inside: avoid; page-break-inside: avoid; background: #fff; display: flex; flex-direction: column; overflow: hidden; }
+  .img-cat-item img { width: 100%; height: 105px; object-fit: contain; margin-bottom: 6px; }
+  .img-cat-item .ic-name { font-size: 0.82rem; font-weight: 800; color: #111827; line-height: 1.25; }
   .img-cat-item .ic-sno { color: #008075; }
-  .img-cat-item .ic-comp { font-size: 0.78rem; font-style: italic; color: #4b5563; line-height: 1.45; margin-top: 4px; }
+  .img-cat-item .ic-comp { font-size: 0.7rem; font-style: italic; color: #4b5563; line-height: 1.35; margin-top: 3px; }
   @page { margin: 1.5cm; size: A4; }
 `;
 
@@ -171,8 +176,8 @@ const SPECIALTY_ORDER = [
   "Orthopedic", "Dermatology", "Pediatric", "Gastroenterology",
 ];
 
-/* Max images per printed A4 page (2 columns × 3 rows). */
-const IMAGES_PER_PAGE = 6;
+/* Max images per printed A4 page (2 columns × 4 rows). */
+const IMAGES_PER_PAGE = 8;
 
 function chunk(arr, size) {
   const out = [];
@@ -189,10 +194,14 @@ function generateImageCatalogueHTML(productList) {
     (a.composition || "").toLowerCase().localeCompare((b.composition || "").toLowerCase())
   );
 
+  /* A product carrying multiple labels (e.g. General + Gynecology) appears
+     under every one of its labels, not just the primary/first one. */
   const grouped = {};
   sortedList.forEach((p) => {
-    const spec = (p.labels && p.labels[0]) ? p.labels[0] : "Other";
-    (grouped[spec] ||= []).push(p);
+    const specs = (p.labels && p.labels.length) ? p.labels : ["Other"];
+    specs.forEach((spec) => {
+      (grouped[spec] ||= []).push(p);
+    });
   });
 
   const specialties = Object.keys(grouped).sort((a, b) => {
