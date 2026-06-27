@@ -552,6 +552,9 @@ input, select, textarea { font-family: inherit; outline: none; }
 .admin-products-table .composition-cell { color: var(--text-secondary); font-style: italic; max-width: 250px; font-size: 0.75rem; }
 .admin-products-table .label-cell-tag { display: inline-block; padding: 3px 10px; border-radius: var(--radius-full); font-size: 0.7rem; font-weight: 600; border: 1px solid; }
 .admin-products-table .price-cell { font-weight: 800; color: var(--brand-teal-dark); white-space: nowrap; }
+.admin-products-table .rate-cell { font-weight: 700; color: #d97706; white-space: nowrap; }
+.rate-empty { color: var(--text-muted); font-weight: 400; }
+.admin-only-tag { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; background: rgba(217,119,6,0.12); color: #d97706; border: 1px solid rgba(217,119,6,0.3); vertical-align: middle; }
 .label-cell-wrap { display: flex; flex-wrap: wrap; gap: 4px; }
 .cell-id { font-size: 0.7rem; color: var(--text-muted); }
 .table-empty { text-align: center; padding: 40px; color: var(--text-muted); }

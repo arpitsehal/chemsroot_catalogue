@@ -92,6 +92,7 @@ export const dom = {
   formCancelCustomLabelBtn: $("#form-cancel-custom-label-btn"),
   formSelectedLabelsContainer: $("#form-selected-labels-container"),
   formPrice: $("#form-price"),
+  formRate: $("#form-rate"),
   formPackaging: $("#form-packaging"),
   formBadge: $("#form-badge"),
   formImageInput: $("#form-image"),

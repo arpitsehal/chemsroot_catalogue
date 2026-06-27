@@ -128,7 +128,7 @@ export function renderAdminProducts() {
   }
 
   if (list.length === 0) {
-    dom.adminProductsTbody.innerHTML = `<tr><td colspan="7" class="table-empty">No products found</td></tr>`;
+    dom.adminProductsTbody.innerHTML = `<tr><td colspan="8" class="table-empty">No products found</td></tr>`;
     return;
   }
 
@@ -151,6 +151,7 @@ export function renderAdminProducts() {
           </div>
         </td>
         <td class="price-cell">₹${p.price.toFixed(2)}</td>
+        <td class="rate-cell">${p.rate != null && p.rate !== "" && !isNaN(p.rate) ? "₹" + Number(p.rate).toFixed(2) : "<span class=\"rate-empty\">NA</span>"}</td>
         <td>
           <div class="admin-actions-cell">
             <button class="admin-action-btn edit" data-edit-id="${p.id}">✏️ Edit</button>
@@ -216,6 +217,7 @@ export function resetAdminForm() {
   dom.formCategory.value = "";
   if (dom.formLabelSelect) dom.formLabelSelect.value = "";
   dom.formPrice.value = "";
+  if (dom.formRate) dom.formRate.value = "";
   dom.formPackaging.value = "";
   dom.formBadge.value = "";
   dom.formImageInput.value = "";
@@ -254,6 +256,7 @@ export function editProduct(productId) {
 
   dom.formCategory.value = p.category;
   dom.formPrice.value = p.price;
+  if (dom.formRate) dom.formRate.value = p.rate != null ? p.rate : "";
   dom.formPackaging.value = p.packaging;
   dom.formBadge.value = p.badge || "";
 
@@ -359,6 +362,8 @@ export async function saveProduct(e) {
 
   const labels = [...state.currentFormLabels];
   const price = parseFloat(dom.formPrice.value);
+  const rateRaw = dom.formRate ? dom.formRate.value.trim() : "";
+  const rate = rateRaw === "" ? null : parseFloat(rateRaw);
   const packaging = dom.formPackaging.value.trim();
   const badge = dom.formBadge.value;
   const editId = dom.formEditId.value;
@@ -385,7 +390,7 @@ export async function saveProduct(e) {
   if (editId) {
     const idx = state.products.findIndex((p) => p.id === editId);
     if (idx !== -1) {
-      state.products[idx] = { ...state.products[idx], name, composition, description, category, labels, price, packaging, badge, image };
+      state.products[idx] = { ...state.products[idx], name, composition, description, category, labels, price, rate, packaging, badge, image };
       showToast("success", "Product Updated", name);
     }
   } else {
@@ -393,14 +398,14 @@ export async function saveProduct(e) {
       showToast("error", "Duplicate ID", `Product ID "${id}" already exists`);
       return;
     }
-    state.products.push({ id, name, composition, description, category, labels, price, packaging, badge, image });
+    state.products.push({ id, name, composition, description, category, labels, price, rate, packaging, badge, image });
     showToast("success", "Product Added", name);
   }
 
   saveToStorage("cr_products", state.products);
 
   if (useRemote) {
-    const { error } = await upsertProductsRemote([{ id, name, composition, description, category, labels, price, packaging, badge, image }]);
+    const { error } = await upsertProductsRemote([{ id, name, composition, description, category, labels, price, rate, packaging, badge, image }]);
     if (error) {
       showToast("error", "Database Error", "Saved locally, but could not save to Supabase.");
       console.error(error);

@@ -244,6 +244,7 @@
               <th>Category</th>
               <th>Label</th>
               <th>Price</th>
+              <th>Rate <span class="admin-only-tag">Admin only</span></th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -309,6 +310,12 @@
               <label for="form-price">Price (₹)</label>
               <input type="number" id="form-price" step="0.01" min="0" placeholder="0.00" required />
             </div>
+            <div class="input-group">
+              <label for="form-rate">Rate (₹) <span class="admin-only-tag">Admin only</span></label>
+              <input type="number" id="form-rate" step="0.01" min="0" placeholder="0.00" />
+            </div>
+          </div>
+          <div class="form-row">
             <div class="input-group">
               <label for="form-packaging">Packaging</label>
               <input type="text" id="form-packaging" placeholder="e.g. Strip of 10 tablets" required />

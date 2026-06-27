@@ -7,12 +7,16 @@ CREATE TABLE products (
   composition TEXT NOT NULL,
   description TEXT,
   price NUMERIC NOT NULL,
+  rate NUMERIC,            -- admin-only buying/cost rate (nullable; shows "NA" when empty)
   category TEXT NOT NULL,
   labels TEXT[] DEFAULT '{}',
   image TEXT,
   badge TEXT,
   packaging TEXT
 );
+
+-- If the products table already exists, add the rate column with:
+--   ALTER TABLE products ADD COLUMN IF NOT EXISTS rate NUMERIC;
 
 -- 2. Create Orders Table
 CREATE TABLE orders (
