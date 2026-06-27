@@ -26,7 +26,7 @@ import {
   downloadReceiptImage,
   shareOrderWhatsApp,
 } from "./customer.js";
-import { downloadCatalogue, downloadImageCatalogue } from "./exports.js?v=3.3";
+import { downloadCatalogue, downloadRateCatalogue, downloadImageCatalogue } from "./exports.js?v=3.4";
 import {
   renderFormLabels,
   removeFormLabel,
@@ -118,6 +118,7 @@ function bindEvents() {
 
   // ── Catalog: download buttons (admin + public) ──
   dom.downloadCatalogueBtn?.addEventListener("click", downloadCatalogue);
+  dom.downloadRateCatalogueBtn?.addEventListener("click", downloadRateCatalogue);
   dom.downloadImageCatalogueBtn?.addEventListener("click", downloadImageCatalogue);
   dom.publicDownloadCatalogueBtn?.addEventListener("click", downloadCatalogue);
 

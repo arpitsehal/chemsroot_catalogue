@@ -106,6 +106,7 @@ export const dom = {
 
   // Catalogue export (admin header)
   downloadCatalogueBtn: $("#download-catalogue-btn"),
+  downloadRateCatalogueBtn: $("#download-rate-catalogue-btn"),
   downloadImageCatalogueBtn: $("#download-image-catalogue-btn"),
   // Catalogue export (public, main catalog header)
   publicDownloadCatalogueBtn: $("#public-download-catalogue-btn"),

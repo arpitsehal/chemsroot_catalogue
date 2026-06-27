@@ -22,6 +22,7 @@ const PRINT_CSS = `
   .catalogue-table .prod-name { font-weight: 800; color: #111827; font-size: 1rem; line-height: 1.2; }
   .catalogue-table .prod-comp { font-style: italic; color: #4b5563; font-size: 0.8rem; line-height: 1.5; }
   .catalogue-table .prod-price { font-weight: 800; color: #008075; white-space: nowrap; }
+  .catalogue-table .prod-rate { font-weight: 800; color: #d97706; white-space: nowrap; }
   .catalogue-table .col-price { text-align: right; }
   .catalogue-table .cat-heading-row { break-inside: avoid; page-break-inside: avoid; }
   .catalogue-table .cat-heading-cell { background: #1a2940; color: #fff; font-size: 1rem; font-weight: 800; letter-spacing: 0.08em; padding: 12px 16px; border: 1px solid #0f1a2e; text-transform: uppercase; }
@@ -80,8 +81,9 @@ function openPrintWindow(title, bodyHTML) {
   else win.addEventListener("load", triggerPrint);
 }
 
-function generateCatalogueHTML(productList) {
+function generateCatalogueHTML(productList, includeRate = false) {
   const today = new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+  const colCount = includeRate ? 8 : 7;
 
   const sorted = [...productList].sort((a, b) =>
     (a.composition || "").toLowerCase().localeCompare((b.composition || "").toLowerCase())
@@ -108,11 +110,14 @@ function generateCatalogueHTML(productList) {
   entries.forEach(([category, items]) => {
     tableRows += `
       <tr class="cat-heading-row">
-        <td colspan="7" class="cat-heading-cell">📦 ${category.toUpperCase()}</td>
+        <td colspan="${colCount}" class="cat-heading-cell">📦 ${category.toUpperCase()}</td>
       </tr>`;
     items.forEach((p) => {
       serialNo++;
       const formattedComp = p.composition.split(",").map((s) => s.trim()).join("<br>");
+      const rateCell = includeRate
+        ? `<td class="prod-rate col-price">${p.rate != null && p.rate !== "" && !isNaN(p.rate) ? Number(p.rate).toFixed(2) : "NA"}</td>`
+        : "";
       tableRows += `
         <tr>
           <td>${serialNo}</td>
@@ -122,6 +127,7 @@ function generateCatalogueHTML(productList) {
           <td>${(p.labels || []).join(", ")}</td>
           <td>${p.packaging}</td>
           <td class="prod-price col-price">${p.price.toFixed(2)}</td>
+          ${rateCell}
         </tr>`;
     });
   });
@@ -133,7 +139,7 @@ function generateCatalogueHTML(productList) {
           <img src="${logoURL()}" alt="Chems Root Logo" />
           <div class="catalogue-title">
             <h1>Chems Root Pharmaceutical</h1>
-            <p>Product Catalogue &amp; Price List</p>
+            <p>${includeRate ? "Rate Catalogue &mdash; Confidential (Admin Only)" : "Product Catalogue &amp; Price List"}</p>
           </div>
         </div>
         <div class="catalogue-meta">
@@ -152,6 +158,7 @@ function generateCatalogueHTML(productList) {
             <th class="w-spec">SPECIALTY</th>
             <th class="w-pack">PACKAGING</th>
             <th class="w-price col-price">MRP (₹)</th>
+            ${includeRate ? '<th class="w-price col-price">RATE (₹)</th>' : ""}
           </tr>
         </thead>
         <tbody>${tableRows}</tbody>
@@ -167,6 +174,13 @@ function generateCatalogueHTML(productList) {
 export function downloadCatalogue() {
   showToast("info", "Preparing Catalogue", "Opening your product list...");
   openPrintWindow("Chems Root — Product Catalogue", generateCatalogueHTML(state.products));
+}
+
+/* Admin-only: identical to the product catalogue but with a RATE column
+   right after MRP. Only ever invoked from inside the admin panel. */
+export function downloadRateCatalogue() {
+  showToast("info", "Preparing Rate Catalogue", "Opening your admin rate list...");
+  openPrintWindow("Chems Root — Rate Catalogue (Admin)", generateCatalogueHTML(state.products, true));
 }
 
 /* Preferred specialty display order; any specialty not listed here is
