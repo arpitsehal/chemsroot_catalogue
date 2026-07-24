@@ -46,7 +46,11 @@ export function getFilteredProducts() {
         (p.labels && p.labels.some((l) => l.toLowerCase().includes(q)))
     );
   }
-  return list;
+  // Float "New" badged products to the top so users see them first.
+  // Array.sort is stable, so products keep their existing relative order otherwise.
+  return list
+    .slice()
+    .sort((a, b) => (b.badge === "New" ? 1 : 0) - (a.badge === "New" ? 1 : 0));
 }
 
 function cardHTML(p) {
