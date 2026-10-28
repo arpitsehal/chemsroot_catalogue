@@ -199,7 +199,8 @@ function chunk(arr, size) {
   return out;
 }
 
-function generateImageCatalogueHTML(productList) {
+function generateImageCatalogueHTML(productList, opts = {}) {
+  const { title = "Image Catalogue", imageField = "image" } = opts;
   const today = new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
 
   /* Alphabetical by composition, then grouped by primary specialty.
@@ -246,7 +247,7 @@ function generateImageCatalogueHTML(productList) {
           const comp = (p.composition || "").split(",").map((s) => s.trim()).join(", ");
           return `
           <div class="img-cat-item">
-            <img src="${new URL(p.image, window.location.href).href}" alt="${p.name}" />
+            <img src="${new URL(p[imageField], window.location.href).href}" alt="${p.name}" />
             <div class="ic-name"><span class="ic-sno">${serialNo}.</span> ${p.name}</div>
             <div class="ic-comp">${comp}</div>
           </div>`;
@@ -267,7 +268,7 @@ function generateImageCatalogueHTML(productList) {
           <img src="${logoURL()}" alt="Chems Root Logo" />
           <div class="catalogue-title">
             <h1>Chems Root Pharmaceutical</h1>
-            <p>Image Catalogue</p>
+            <p>${title}</p>
           </div>
         </div>
         <div class="catalogue-meta">
@@ -286,4 +287,19 @@ function generateImageCatalogueHTML(productList) {
 export function downloadImageCatalogue() {
   showToast("info", "Preparing Image Catalogue", "Opening your image catalogue...");
   openPrintWindow("Chems Root — Image Catalogue", generateImageCatalogueHTML(state.products));
+}
+
+/* Admin-only: same layout as the image catalogue, but only products that
+   have a visual aid attached, and using that image instead of the main one. */
+export function downloadVisualAidCatalogue() {
+  const withVisualAid = state.products.filter((p) => !!p.visualAid);
+  if (withVisualAid.length === 0) {
+    showToast("warning", "No Visual Aids", "No products have a visual aid image yet. Add one from the Edit Product form.");
+    return;
+  }
+  showToast("info", "Preparing Visual Aid Catalogue", "Opening your visual aid catalogue...");
+  openPrintWindow(
+    "Chems Root — Visual Aid Catalogue",
+    generateImageCatalogueHTML(withVisualAid, { title: "Visual Aid Catalogue", imageField: "visualAid" })
+  );
 }
