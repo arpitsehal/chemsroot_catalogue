@@ -3,7 +3,7 @@ import { state, saveToStorage } from "./store.js";
 import { dom } from "./dom.js";
 import { showToast, formatDate } from "./utils.js";
 import { addToCart, updateCartUI, openCart, closeCart, getCartItemCount } from "./cart.js";
-import { renderProducts, updateUserButton } from "./catalog.js";
+import { renderProducts, updateUserButton } from "./catalog.js?v=3.5";
 import { useRemote, upsertOrderRemote } from "./supabase.js";
 
 // ── Login ──────────────────────────────────────────────────

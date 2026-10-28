@@ -92,7 +92,7 @@ export async function seedSupabase() {
     if (error) throw error;
     showToast("success", "Success", "Products seeded to database!");
     await fetchProductsFromRemote();
-    const { renderProducts } = await import("./catalog.js");
+    const { renderProducts } = await import("./catalog.js?v=3.5");
     renderProducts();
   } catch (err) {
     showToast("error", "Error", err.message);

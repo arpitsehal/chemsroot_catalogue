@@ -2,7 +2,7 @@
 import { state, saveToStorage } from "./store.js";
 import { dom } from "./dom.js";
 import { showToast } from "./utils.js";
-import { renderLabelPills, renderFilterPills, renderProducts, updateUserButton, setCardSlide } from "./catalog.js";
+import { renderLabelPills, renderFilterPills, renderProducts, updateUserButton, setCardSlide } from "./catalog.js?v=3.5";
 import {
   addToCart,
   removeFromCart,
@@ -49,7 +49,7 @@ import {
   removeVisualAid,
   downloadSampleCSV,
   handleBulkUpload,
-} from "./admin.js";
+} from "./admin.js?v=3.5";
 import { useRemote, fetchProductsFromRemote, fetchOrdersFromRemote, seedSupabase } from "./supabase.js";
 
 const debounce = (fn, ms) => {

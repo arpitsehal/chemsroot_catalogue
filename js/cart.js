@@ -2,7 +2,7 @@
 import { state, saveToStorage } from "./store.js";
 import { dom } from "./dom.js";
 import { showToast } from "./utils.js";
-import { renderProducts, updateCardCartState } from "./catalog.js";
+import { renderProducts, updateCardCartState } from "./catalog.js?v=3.5";
 
 export function isInCart(productId) {
   return state.cart.some((item) => item.id === productId);

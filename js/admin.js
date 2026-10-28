@@ -3,7 +3,7 @@ import { state, saveToStorage } from "./store.js";
 import { dom } from "./dom.js";
 import { LABEL_COLORS, CATEGORY_IMAGES, ADMIN_CREDENTIALS } from "./data.js";
 import { showToast, formatDate } from "./utils.js";
-import { renderProducts, renderLabelPills, renderFilterPills } from "./catalog.js";
+import { renderProducts, renderLabelPills, renderFilterPills } from "./catalog.js?v=3.5";
 import { updateCartUI } from "./cart.js";
 import { useRemote, deleteProductRemote, upsertProductsRemote } from "./supabase.js";
 
