@@ -60,6 +60,11 @@ const debounce = (fn, ms) => {
   };
 };
 
+function closeCatalogueDropdown() {
+  dom.catalogueDropdown?.classList.remove("open");
+  dom.catalogueDropdownBtn?.setAttribute("aria-expanded", "false");
+}
+
 function pulseCartBadge() {
   dom.cartBadge.style.transform = "scale(1.3)";
   setTimeout(() => (dom.cartBadge.style.transform = ""), 200);
@@ -123,6 +128,21 @@ function bindEvents() {
   dom.downloadRateCatalogueBtn?.addEventListener("click", downloadRateCatalogue);
   dom.downloadImageCatalogueBtn?.addEventListener("click", downloadImageCatalogue);
   dom.downloadVisualAidCatalogueBtn?.addEventListener("click", downloadVisualAidCatalogue);
+
+  // ── Catalogue download dropdown ──
+  dom.catalogueDropdownBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isOpen = dom.catalogueDropdown.classList.toggle("open");
+    dom.catalogueDropdownBtn.setAttribute("aria-expanded", String(isOpen));
+  });
+  dom.catalogueDropdownMenu?.addEventListener("click", (e) => {
+    if (e.target.closest(".admin-dropdown-item")) closeCatalogueDropdown();
+  });
+  document.addEventListener("click", (e) => {
+    if (dom.catalogueDropdown?.classList.contains("open") && !dom.catalogueDropdown.contains(e.target)) {
+      closeCatalogueDropdown();
+    }
+  });
   dom.publicDownloadCatalogueBtn?.addEventListener("click", downloadCatalogue);
 
   // ── Catalog: add to cart / update qty ──
@@ -397,7 +417,8 @@ function bindEvents() {
   // ── Global keyboard ──
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
-    if (dom.imageZoomModal.classList.contains("open")) {
+    if (dom.catalogueDropdown?.classList.contains("open")) closeCatalogueDropdown();
+    else if (dom.imageZoomModal.classList.contains("open")) {
       dom.imageZoomModal.classList.remove("open");
       document.body.style.overflow = "";
     } else if (dom.customerModal.classList.contains("open")) closeCustomerLogin();

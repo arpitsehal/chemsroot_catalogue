@@ -108,6 +108,9 @@ export const dom = {
   toastContainer: $("#toast-container"),
 
   // Catalogue export (admin header)
+  catalogueDropdown: $("#catalogue-dropdown"),
+  catalogueDropdownBtn: $("#catalogue-dropdown-btn"),
+  catalogueDropdownMenu: $("#catalogue-dropdown-menu"),
   downloadCatalogueBtn: $("#download-catalogue-btn"),
   downloadRateCatalogueBtn: $("#download-rate-catalogue-btn"),
   downloadImageCatalogueBtn: $("#download-image-catalogue-btn"),
