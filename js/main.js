@@ -2,7 +2,7 @@
 import { state, saveToStorage } from "./store.js";
 import { dom } from "./dom.js";
 import { showToast } from "./utils.js";
-import { renderLabelPills, renderFilterPills, renderProducts, updateUserButton } from "./catalog.js";
+import { renderLabelPills, renderFilterPills, renderProducts, updateUserButton, setCardSlide } from "./catalog.js";
 import {
   addToCart,
   removeFromCart,
@@ -45,6 +45,8 @@ import {
   saveProduct,
   resetAdminForm,
   handleImageUpload,
+  handleVisualAidUpload,
+  removeVisualAid,
   downloadSampleCSV,
   handleBulkUpload,
 } from "./admin.js";
@@ -163,6 +165,45 @@ function bindEvents() {
       }, 200);
     }
   });
+
+  // ── Catalog: swipe left on a card image to reveal its visual aid ──
+  let swipeCard = null;
+  let swipeStartX = null;
+  let swipeStartY = null;
+
+  dom.productGrid.addEventListener(
+    "touchstart",
+    (e) => {
+      const cardImage = e.target.closest(".card-image.has-visual-aid");
+      if (!cardImage) return;
+      swipeCard = cardImage;
+      swipeStartX = e.touches[0].clientX;
+      swipeStartY = e.touches[0].clientY;
+    },
+    { passive: true }
+  );
+
+  dom.productGrid.addEventListener(
+    "touchend",
+    (e) => {
+      if (!swipeCard || swipeStartX === null) return;
+      const touch = e.changedTouches[0];
+      const deltaX = touch.clientX - swipeStartX;
+      const deltaY = touch.clientY - swipeStartY;
+      const card = swipeCard;
+      swipeCard = null;
+      swipeStartX = null;
+      swipeStartY = null;
+
+      // Ignore short drags and mostly-vertical scrolling gestures.
+      if (Math.abs(deltaX) < 40 || Math.abs(deltaX) < Math.abs(deltaY)) return;
+
+      const currentSlide = parseInt(card.dataset.slide || "0", 10);
+      if (deltaX < 0 && currentSlide === 0) setCardSlide(card, 1);
+      else if (deltaX > 0 && currentSlide === 1) setCardSlide(card, 0);
+    },
+    { passive: true }
+  );
 
   // ── Cart panel ──
   dom.cartToggle.addEventListener("click", openCart);
@@ -328,6 +369,8 @@ function bindEvents() {
   });
 
   dom.formImageInput.addEventListener("change", (e) => handleImageUpload(e.target.files[0]));
+  dom.formVisualAidInput.addEventListener("change", (e) => handleVisualAidUpload(e.target.files[0]));
+  dom.formRemoveVisualAidBtn.addEventListener("click", removeVisualAid);
   dom.adminProductForm.addEventListener("submit", saveProduct);
   dom.formCancelBtn.addEventListener("click", () => {
     resetAdminForm();

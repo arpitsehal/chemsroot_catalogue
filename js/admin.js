@@ -224,6 +224,11 @@ export function resetAdminForm() {
   dom.formImagePreview.style.display = "none";
   dom.formImagePreview.src = "";
   state.uploadedImageDataUrl = null;
+  dom.formVisualAidInput.value = "";
+  dom.formVisualAidPreview.style.display = "none";
+  dom.formVisualAidPreview.src = "";
+  dom.formRemoveVisualAidBtn.style.display = "none";
+  state.uploadedVisualAidDataUrl = null;
   dom.formCustomCategory.value = "";
   dom.formCustomCategory.style.display = "none";
   dom.formCustomCategory.required = false;
@@ -269,6 +274,19 @@ export function editProduct(productId) {
     dom.formImagePreview.style.display = "none";
     dom.formImagePreview.src = "";
   }
+
+  if (p.visualAid) {
+    state.uploadedVisualAidDataUrl = p.visualAid;
+    dom.formVisualAidPreview.src = p.visualAid;
+    dom.formVisualAidPreview.style.display = "block";
+    dom.formRemoveVisualAidBtn.style.display = "inline-block";
+  } else {
+    state.uploadedVisualAidDataUrl = null;
+    dom.formVisualAidPreview.style.display = "none";
+    dom.formVisualAidPreview.src = "";
+    dom.formRemoveVisualAidBtn.style.display = "none";
+  }
+
   dom.formTitle.textContent = `Edit Product — ${p.id}`;
   dom.formSubmitBtn.textContent = "Save Changes";
 }
@@ -382,6 +400,8 @@ export async function saveProduct(e) {
     image = state.uploadedImageDataUrl || fallbackImage;
   }
 
+  const visualAid = state.uploadedVisualAidDataUrl || null;
+
   if (!id || !name || !composition || !description || !category || labels.length === 0 || isNaN(price) || !packaging) {
     showToast("warning", "Missing Fields", "Please fill in all required fields and add at least one label.");
     return;
@@ -390,7 +410,7 @@ export async function saveProduct(e) {
   if (editId) {
     const idx = state.products.findIndex((p) => p.id === editId);
     if (idx !== -1) {
-      state.products[idx] = { ...state.products[idx], name, composition, description, category, labels, price, rate, packaging, badge, image };
+      state.products[idx] = { ...state.products[idx], name, composition, description, category, labels, price, rate, packaging, badge, image, visualAid };
       showToast("success", "Product Updated", name);
     }
   } else {
@@ -398,14 +418,14 @@ export async function saveProduct(e) {
       showToast("error", "Duplicate ID", `Product ID "${id}" already exists`);
       return;
     }
-    state.products.push({ id, name, composition, description, category, labels, price, rate, packaging, badge, image });
+    state.products.push({ id, name, composition, description, category, labels, price, rate, packaging, badge, image, visualAid });
     showToast("success", "Product Added", name);
   }
 
   saveToStorage("cr_products", state.products);
 
   if (useRemote) {
-    const { error } = await upsertProductsRemote([{ id, name, composition, description, category, labels, price, rate, packaging, badge, image }]);
+    const { error } = await upsertProductsRemote([{ id, name, composition, description, category, labels, price, rate, packaging, badge, image, visualAid }]);
     if (error) {
       showToast("error", "Database Error", "Saved locally, but could not save to Supabase.");
       console.error(error);
@@ -450,6 +470,46 @@ export function handleImageUpload(file) {
     img.src = event.target.result;
   };
   reader.readAsDataURL(file);
+}
+
+export function handleVisualAidUpload(file) {
+  if (!file) {
+    state.uploadedVisualAidDataUrl = null;
+    dom.formVisualAidPreview.style.display = "none";
+    dom.formRemoveVisualAidBtn.style.display = "none";
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const MAX_WIDTH = 500;
+      let width = img.width;
+      let height = img.height;
+      if (width > MAX_WIDTH) {
+        height *= MAX_WIDTH / width;
+        width = MAX_WIDTH;
+      }
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+      state.uploadedVisualAidDataUrl = canvas.toDataURL("image/jpeg", 0.7);
+      dom.formVisualAidPreview.src = state.uploadedVisualAidDataUrl;
+      dom.formVisualAidPreview.style.display = "block";
+      dom.formRemoveVisualAidBtn.style.display = "inline-block";
+    };
+    img.src = event.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+export function removeVisualAid() {
+  state.uploadedVisualAidDataUrl = null;
+  dom.formVisualAidInput.value = "";
+  dom.formVisualAidPreview.style.display = "none";
+  dom.formVisualAidPreview.src = "";
+  dom.formRemoveVisualAidBtn.style.display = "none";
 }
 
 // ── Bulk CSV ───────────────────────────────────────────────

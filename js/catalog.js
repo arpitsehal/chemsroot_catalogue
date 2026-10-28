@@ -65,12 +65,25 @@ function cardHTML(p) {
   const inCart = isInCart(p.id);
   const qty = inCart ? cartQty(p.id) : 1;
 
+  const hasVisualAid = !!p.visualAid;
+  const imageAreaHTML = hasVisualAid
+    ? `
+        <div class="card-image-track">
+          <div class="card-image-slide"><img src="${p.image}" alt="${p.name}" loading="lazy" decoding="async" /></div>
+          <div class="card-image-slide"><img src="${p.visualAid}" alt="${p.name} — visual aid" loading="lazy" decoding="async" /></div>
+        </div>
+        <div class="card-image-dots">
+          <span class="card-image-dot active" data-dot="0"></span>
+          <span class="card-image-dot" data-dot="1"></span>
+        </div>`
+    : `<img src="${p.image}" alt="${p.name}" loading="lazy" decoding="async" />`;
+
   return `
     <div class="product-card" data-product-id="${p.id}">
-      <div class="card-image">
+      <div class="card-image${hasVisualAid ? " has-visual-aid" : ""}" data-slide="0">
         ${getBadgeHTML(p.badge)}
         <div class="card-label-stack">${labelTagsHTML}</div>
-        <img src="${p.image}" alt="${p.name}" loading="lazy" decoding="async" />
+        ${imageAreaHTML}
       </div>
       <div class="card-body">
         <div class="card-id">${p.id}</div>
@@ -133,6 +146,16 @@ export function updateCardCartState(id) {
     btn.innerHTML = `<span class="btn-icon">${inCart ? "↻" : "+"}</span><span>${inCart ? "Update" : "Add"}</span>`;
   }
   if (input) input.value = inCart ? cartQty(id) : 1;
+}
+
+/* Switches a swipeable product card between its main image (0) and
+   visual aid (1) slide, updating the track position and dot state. */
+export function setCardSlide(card, index) {
+  const track = card.querySelector(".card-image-track");
+  if (!track) return;
+  card.dataset.slide = String(index);
+  track.style.transform = `translateX(-${index * 50}%)`;
+  card.querySelectorAll(".card-image-dot").forEach((dot, i) => dot.classList.toggle("active", i === index));
 }
 
 export function updateUserButton() {

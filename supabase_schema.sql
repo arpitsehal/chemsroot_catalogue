@@ -18,6 +18,11 @@ CREATE TABLE products (
 -- If the products table already exists, add the rate column with:
 --   ALTER TABLE products ADD COLUMN IF NOT EXISTS rate NUMERIC;
 
+-- visualAid: optional second product image, shown when a customer swipes
+-- left on the product card in the catalog. Quoted to preserve camelCase
+-- so it matches the JS object key sent by supabase-js.
+--   ALTER TABLE products ADD COLUMN IF NOT EXISTS "visualAid" TEXT;
+
 -- 2. Create Orders Table
 CREATE TABLE orders (
   order_id TEXT PRIMARY KEY,

@@ -75,6 +75,7 @@ export const state = {
   adminLabelFilter: "All",
   currentFormLabels: [],
   uploadedImageDataUrl: null,
+  uploadedVisualAidDataUrl: null,
 
   // Order flow
   loginIntent: null,
